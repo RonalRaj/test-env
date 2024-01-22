@@ -26,4 +26,4 @@ jobs:
             echo "test=${{ secrets.test }}" >> $GITHUB_ENV
           fi
       - name: run
-        run: cat ${{ env.test }}
+        run: cat $test
