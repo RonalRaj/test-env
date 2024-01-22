@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploying
 
 on:
   push:
@@ -22,11 +22,13 @@ jobs:
           if [ $GITHUB_REF == 'refs/heads/stage' ]; then
             echo "test=${{ secrets.test }}" >> $GITHUB_ENV
             echo "ENV_FILE_NAME=.env.stage" >> $GITHUB_ENV
+            echo "run=dev:stage >> $GITHUB_ENV
 
           fi
           if [ $GITHUB_REF == 'refs/heads/main' ]; then
             echo "test=${{ secrets.test }}" >> $GITHUB_ENV
             echo "ENV_FILE_NAME=.env.main" >> $GITHUB_ENV
+            echo "run=dev:main >> $GITHUB_ENV
           fi
       - name: run
         run: echo $test
@@ -39,3 +41,6 @@ jobs:
 
       - name: run
         run: cat ${{ env.ENV_FILE_NAME }}
+
+      - name: run
+        run: echo ${{ env.run }}
