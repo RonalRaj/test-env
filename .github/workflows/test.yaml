@@ -21,9 +21,21 @@ jobs:
         run: |
           if [ $GITHUB_REF == 'refs/heads/stage' ]; then
             echo "test=${{ secrets.test }}" >> $GITHUB_ENV
+            echo "ENV_FILE_NAME=.env.stage" >> $GITHUB_ENV
+
           fi
           if [ $GITHUB_REF == 'refs/heads/main' ]; then
             echo "test=${{ secrets.test }}" >> $GITHUB_ENV
+            echo "ENV_FILE_NAME=.env.main" >> $GITHUB_ENV
           fi
       - name: run
         run: echo $test
+      - name: Make env
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_test: "${{ env.test }}"
+          file_name: "${{ env.ENV_FILE_NAME }}"
+          fail_on_empty: true
+
+      - name: run
+        run: cat ${{ env.ENV_FILE_NAME }}
