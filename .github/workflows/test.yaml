@@ -1,0 +1,29 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - stage 
+
+permissions:
+  id-token: write  
+
+jobs:
+  setup:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Set Environment Variable
+        run: |
+          if [ $GITHUB_REF == 'refs/heads/stage' ]; then
+            echo "test=${{ secrets.test }}" >> $GITHUB_ENV
+          fi
+          if [ $GITHUB_REF == 'refs/heads/main' ]; then
+            echo "test=${{ secrets.test }}" >> $GITHUB_ENV
+          fi
+      - name: run
+        run: cat ${{ env.test }}
