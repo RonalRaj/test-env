@@ -1,0 +1,64 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Which environment to deploy to?'
+        required: true
+        default: 'dev'
+
+
+permissions:
+  id-token: write  
+
+jobs:
+  setup:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+      - name: Set DEPLOY_ENV
+        id: set-deploy-env
+        run: |
+          if [ -n "${{ github.event.inputs.environment }}" ]; then
+            echo "BRANCH=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          fi
+          if [ -z "${{ github.event.inputs.environment }}" ]; then
+            echo "BRANCH=$(echo $GITHUB_REF | sed 's|refs/heads/||')" >> $GITHUB_ENV
+          fi
+      - name: Set Environment Variable
+        run: |
+          if [ "${{ env.BRANCH }}" == "dev" ]; then
+            echo "REACT_APP_NAME=value_for_dev_branch" >> $GITHUB_ENV
+            echo "S3_BUCKET_NAME=my-static-site-test-v5" >> $GITHUB_ENV
+          fi
+          if [ "${{ env.BRANCH }}" == "main" ]; then
+            echo "REACT_APP_NAME=value_for_main_branch" >> $GITHUB_ENV
+            echo "S3_BUCKET_NAME=my-static-site-test-v5" >> $GITHUB_ENV
+          fi
+        # if [ $GITHUB_REF == 'refs/heads/dev' ]; then
+          #   echo "REACT_APP_API_URL=http://localhost:8080" >> $GITHUB_ENV
+          #   echo "REACT_APP_OKTA_ISSUER=https://trial-7359498.okta.com/oauth2/default" >> $GITHUB_ENV
+          #   echo "REACT_APP_OKTA_CLIENT_ID=0oaasuvhldaZySzK9697" >> $GITHUB_ENV
+          #   echo "REACT_APP_OKTA_REDIRECT_URI=/app/dashboard" >> $GITHUB_ENV
+          #   echo "REACT_APP_OKTA_PKCE=true" >> $GITHUB_ENV
+          # fi
+      - name: Install dependency
+        run: npm i
+        
+      - name: Build
+        run: npm run build 
+          
+      - name: Copy to S3
+        run: aws s3 sync build/ "s3://${{ env.S3_BUCKET_NAME }}"
