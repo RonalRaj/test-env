@@ -42,11 +42,11 @@ jobs:
           case "${{ env.BRANCH }}" in
             "dev")
               echo "REACT_APP_NAME=value_for_dev_branch" >> $GITHUB_ENV
-              echo "S3_BUCKET_NAME=my-static-site-dev" >> $GITHUB_ENV
+              echo "S3_BUCKET_NAME=my-static-site-test-v5" >> $GITHUB_ENV
               ;;
             "main")
               echo "REACT_APP_NAME=value_for_main_branch" >> $GITHUB_ENV
-              echo "S3_BUCKET_NAME=my-static-site-main" >> $GITHUB_ENV
+              echo "S3_BUCKET_NAME=my-static-site-test-v5" >> $GITHUB_ENV
               ;;
           esac
       
